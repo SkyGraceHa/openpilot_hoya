@@ -370,8 +370,9 @@ class NaviControl():
     self.lead_1 = self.sm['radarState'].leadTwo
     #self.leadv3 = self.sm['modelV2'].leadsV3
 
-    cut_in_model = True if self.lead_1.status and (self.lead_0.dRel - self.lead_1.dRel) > 3.0 else False
-    cut_in_ed_rd_diff = True if 0 < CS.lead_distance <= 149 and (CS.lead_distance - self.lead_0.dRel) > 3.0 else False
+    cut_in_model = True if self.lead_1.status and (self.lead_0.dRel - self.lead_1.dRel) > 3.0 and ((0 < self.lead_0.dRel < 85) or (0 < self.lead_1.dRel < 85)) else False
+    dist_sel = self.lead_1.dRel if 0 < self.lead_1.dRel < 85 else self.lead_0.dRel if 0 < self.lead_0.dRel < 85 else CS.lead_distance
+    cut_in_ed_rd_diff = True if 0 < CS.lead_distance <= 90 and (CS.lead_distance - dist_sel) > 3.0 else False
 
     self.cut_in = cut_in_model or cut_in_ed_rd_diff
 
@@ -393,15 +394,15 @@ class NaviControl():
     elif CS.cruise_set_mode in (1,2,4):
       if CS.out.brakeLights and CS.out.vEgo == 0:
         self.faststart = True
-        var_speed = min(navi_speed, 30 if CS.is_set_speed_in_mph else 50)
+        var_speed = min(navi_speed, 35 if CS.is_set_speed_in_mph else 55)
       elif self.onSpeedBumpControl2 and not self.lead_0.status:
-        var_speed = min(navi_speed, 30 if CS.is_set_speed_in_mph else 50)
+        var_speed = min(navi_speed, 35 if CS.is_set_speed_in_mph else 55)
         self.t_interval = 7
       elif self.onSpeedBumpControl:
         var_speed = min(navi_speed, 20 if CS.is_set_speed_in_mph else 30)
         self.t_interval = 7
       elif self.faststart and CS.CP.vFuture <= 40:
-        var_speed = min(navi_speed, 30 if CS.is_set_speed_in_mph else 50)
+        var_speed = min(navi_speed, 35 if CS.is_set_speed_in_mph else 55)
       elif self.lead_0.status and CS.CP.vFuture >= (min_control_speed-(4 if CS.is_set_speed_in_mph else 7)):
         self.faststart = False
         dRel = int(self.lead_0.dRel)
